@@ -52,7 +52,7 @@ exports.beerSearch = function(query, callback) {
                     brewery_url: brewery_url,
                     retired: retired
                 };
-                
+
                 // Add to beer array
                 beers.push(data);
 
@@ -83,19 +83,23 @@ exports.beerPage = function(url, callback) {
             var beer = [];
 
             // Beer & brewery name
-            var title = $('h1').text().split(/\s-\s/),
-                beer_name = title[0],
-                brewery_name = title[1];
+            var beer_name = $("h1").html().split("<")[0],
+                brewery_name = $("h1 span").text().substring(3); // Strip off the " - " at the beginning.
 
             // ABV
             var beer_abv_chunk = $('#baContent table').eq(1).find('td').text().split(/%\sABV/)[0],
                 beer_abv = beer_abv_chunk.substr(beer_abv_chunk.length - 6).trimLeft() + "%";
 
             // Brewery details
-            var links = $('#baContent table').eq(1).find('tr').eq(2).find('td').find('a'),
-                brewery_state = links.eq(2).text(),
-                brewery_country = links.eq(3).text(),
-                beer_style = links.eq(4).text();
+            var links = $('#baContent table').eq(1).find('tr').eq(2).find('td').find('a');
+            // We need to check to see if link2 is actually a state or if it's a country. We can check the href
+            // to see if it matches a pattern for a US state. If not, bypass the field and continue populating the
+            // country and style fields.
+            var linkIdx = 2; // Start on link2
+            var splitLink2 = links.eq(linkIdx).attr('href').split("/place/directory/9/US/");
+            var brewery_state = (splitLink2.length == 2 &&  splitLink2[1] != "") ? links.eq(linkIdx++).text() : "",
+                brewery_country = links.eq(linkIdx++).text(),
+                beer_style = links.eq(linkIdx).text();
 
             // Beer Advocate scores
             var ba_info = $('.BAscore_big').eq(0),
@@ -149,14 +153,14 @@ exports.beerTopReviews = function(beer_url, count, callback) {
     // n  : Returns up to n reviews (no error is thrown if n is not met)
 
     if(arguments.length == 2){
-    
+
         // Count holds the callback
         callback = count;
-        
+
         // Make the default count 25
         count = 25;
     }
-    
+
     // Replace any -1 with the max
     if(count == -1){
         count = Number.MAX_VALUE;
@@ -166,27 +170,27 @@ exports.beerTopReviews = function(beer_url, count, callback) {
         start_index = 0,
         reviews = [],
         max_review_count = null;
-    
+
     // Create recursive review populator
-        if (!this.request) {
-            this.request = _request;
-        }
+    if (!this.request) {
+        this.request = _request;
+    }
     var self = this;
     var populate_reviews = function(url){
-    
+
         self.request(url, function (error, response, html) {
 
             if (!error && response.statusCode == 200) {
 
                 var $ = cheerio.load(html);
-                
+
                 // Get the total number of reviews if it's not known
-                if(!max_review_count){                  
+                if(!max_review_count){
                     var tc = $($('#baContent').contents()[11]).text();
                     max_review_count = tc
                         .split('|')[1]
                         .split(':')[1];
-                    
+
                     if(max_review_count){
                         max_review_count = max_review_count.trim()
                     }
@@ -204,26 +208,26 @@ exports.beerTopReviews = function(beer_url, count, callback) {
 
                     // Review score
                     var rating = li.children('.BAscore_norm').eq(0).text();
-                    
+
                     // Review score total
                     var rating_max_el = li.children('.rAvg_norm'),
                         rating_max = rating_max_el.eq(0).text().replace('/','');
-                    
+
                     // Get all the text only nodes
                     var text_nodes = [];
                     li.contents().each(function(){
-                    
+
                         if(this[0].type === 'text'){
                             text_nodes.push(this[0]);
                         }
-                        
+
                     });
-                    
+
                     // Rating attributes
                     var attribute_split = li.children('.muted').eq(0).text().split('|');
 
                     if(attribute_split.length == 5){
-                    
+
                         attributes = {
                             look: attribute_split[0].split(':')[1].trim(),
                             smell: attribute_split[1].split(':')[1].trim(),
@@ -231,7 +235,7 @@ exports.beerTopReviews = function(beer_url, count, callback) {
                             feel: attribute_split[3].split(':')[1].trim(),
                             overall: attribute_split[4].split(':')[1].trim()
                         }
-                        
+
                     } else {
 
                         // TODO fix attributes
@@ -241,18 +245,18 @@ exports.beerTopReviews = function(beer_url, count, callback) {
 
                     // Date
                     var date = text_nodes[text_nodes.length-1].data.replace('&nbsp|&nbsp;',''),
-                        
+
                     // Review text              
-                    review_text_arr = text_nodes.slice(3, text_nodes.length - 2);
-                    
+                        review_text_arr = text_nodes.slice(3, text_nodes.length - 2);
+
                     // Replace the dom objects with text
                     for(var i=review_text_arr.length; i--;){
                         review_text_arr[i] = review_text_arr[i].data;
                     };
-                    
+
                     // Join the text
                     review_text = review_text_arr.join('\n');
-                    
+
                     // Data to return
                     var data = {
                         reviewer: reviewer,
@@ -263,34 +267,34 @@ exports.beerTopReviews = function(beer_url, count, callback) {
                         review_text: review_text,
                         date: date
                     };
-                    
+
                     // Add to reviews array
                     reviews.push(data);
-                });         
-                
+                });
+
                 if(reviews.length < count && reviews.length < max_review_count){
-                
+
                     populate_reviews(base_url + reviews.length);
-                    
+
                 }
                 else{
-                
+
                     reviews = reviews.splice(0, count);
                     callback(JSON.stringify(reviews));
-                    
+
                 }
             }
             else{
-            
+
                 callback(JSON.stringify(error));
-                
+
             }
         });
     };
-    
+
     // Start recursion
     populate_reviews(base_url + start_index);
-    
+
 }
 
 exports.brewerySearch = function(query, callback) {
