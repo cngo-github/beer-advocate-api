@@ -95,9 +95,13 @@ exports.beerPage = function(url, callback) {
             // We need to check to see if link2 is actually a state or if it's a country. We can check the href
             // to see if it matches a pattern for a US state. If not, bypass the field and continue populating the
             // country and style fields.
-            var linkIdx = 2; // Start on link2
-            var splitLink2 = links.eq(linkIdx).attr('href').split("/place/directory/9/US/");
-            var brewery_state = (splitLink2.length == 2 &&  splitLink2[1] != "") ? links.eq(linkIdx++).text() : "",
+            var linkIdx = links.eq(1).attr('href').indexOf("/place/directory/") > -1 ? 1 : 2; // Start on link2
+            console.log(linkIdx);
+            var splitLinkUS2 = links.eq(linkIdx).attr('href').split("/place/directory/9/US/");
+            var splitLinkCA2 = links.eq(linkIdx).attr('href').split("/place/directory/9/CA/");
+            var brewery_state = ((splitLinkUS2.length == 2 && splitLinkUS2[1] != "") || (splitLinkCA2.length == 2 && splitLinkCA2[1] != "")) ?
+                links.eq(linkIdx++).text() :
+                "",
                 brewery_country = links.eq(linkIdx++).text(),
                 beer_style = links.eq(linkIdx).text();
 
