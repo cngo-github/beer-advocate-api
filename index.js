@@ -86,6 +86,10 @@ exports.beerPage = function(url, callback) {
             var beer_name = $("h1").html().split("<")[0],
                 brewery_name = $("h1 span").text().substring(3); // Strip off the " - " at the beginning.
 
+            // Image
+            var image = $('#baContent table').eq(0).find('td img').eq(0).attr("src");
+
+
             // ABV
             var beer_abv_chunk = $('#baContent table').eq(1).find('td').text().split(/%\sABV/)[0],
                 beer_abv = beer_abv_chunk.substr(beer_abv_chunk.length - 6).trimLeft() + "%";
@@ -96,7 +100,6 @@ exports.beerPage = function(url, callback) {
             // to see if it matches a pattern for a US state. If not, bypass the field and continue populating the
             // country and style fields.
             var linkIdx = links.eq(1).attr('href').indexOf("/place/directory/") > -1 ? 1 : 2; // Start on link2
-            console.log(linkIdx);
             var splitLinkUS2 = links.eq(linkIdx).attr('href').split("/place/directory/9/US/");
             var splitLinkCA2 = links.eq(linkIdx).attr('href').split("/place/directory/9/CA/");
             var brewery_state = ((splitLinkUS2.length == 2 && splitLinkUS2[1] != "") || (splitLinkCA2.length == 2 && splitLinkCA2[1] != "")) ?
@@ -136,7 +139,8 @@ exports.beerPage = function(url, callback) {
                 ratings: ratings,
                 reviews: reviews,
                 rAvg: rAvg,
-                pDev: pDev
+                pDev: pDev,
+                beer_image: image
             };
 
             // Add to beer array
