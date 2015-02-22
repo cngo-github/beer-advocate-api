@@ -140,7 +140,8 @@ exports.beerPage = function(url, callback) {
                 reviews: reviews,
                 rAvg: rAvg,
                 pDev: pDev,
-                beer_image: image
+                beer_image: image,
+                ba_url: url
             };
 
             // Add to beer array
