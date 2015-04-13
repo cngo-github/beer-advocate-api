@@ -21,7 +21,7 @@ exports.beerSearch = function(query, callback) {
 
             var beers = [];
 
-            $('#baContent ul li').each(function(beer) {
+            $('#ba-content ul li').each(function(beer) {
 
                 // One beer listing
                 var li = $(this);
@@ -87,15 +87,15 @@ exports.beerPage = function(url, callback) {
                 brewery_name = $("h1 span").text().substring(3); // Strip off the " - " at the beginning.
 
             // Image
-            var image = $('#baContent table').eq(0).find('td img').eq(0).attr("src");
+            var image = $('#ba-content table').eq(0).find('td img').eq(0).attr("src");
 
 
             // ABV
-            var beer_abv_chunk = $('#baContent table').eq(1).find('td').text().split(/%\sABV/)[0],
+            var beer_abv_chunk = $('#ba-content table').eq(1).find('td').text().split(/%\sABV/)[0],
                 beer_abv = beer_abv_chunk.substr(beer_abv_chunk.length - 6).trimLeft() + "%";
 
             // Brewery details
-            var links = $('#baContent table').eq(1).find('tr').eq(2).find('td').find('a');
+            var links = $('#ba-content table').eq(1).find('tr').eq(2).find('td').find('a');
             // We need to check to see if link2 is actually a state or if it's a country. We can check the href
             // to see if it matches a pattern for a US state. If not, bypass the field and continue populating the
             // country and style fields.
@@ -118,7 +118,7 @@ exports.beerPage = function(url, callback) {
                 bros_rating = bros_info.next().next().text();
 
             // More stats
-            var stats = $('#baContent table').eq(2).find('td:last-child').text().split(/:\s/),
+            var stats = $('#ba-content table').eq(2).find('td:last-child').text().split(/:\s/),
                 ratings = stats[1].replace("\nReviews",""),
                 reviews = stats[2].replace("rAvg",""),
                 rAvg = stats[3].replace("\n\npDev",""),
@@ -195,7 +195,7 @@ exports.beerTopReviews = function(beer_url, count, callback) {
 
                 // Get the total number of reviews if it's not known
                 if(!max_review_count){
-                    var tc = $($('#baContent').contents()[11]).text();
+                    var tc = $($('#ba-content').contents()[11]).text();
                     max_review_count = tc
                         .split('|')[1]
                         .split(':')[1];
@@ -322,7 +322,7 @@ exports.brewerySearch = function(query, callback) {
 
             var breweries = [];
 
-            $('#baContent ul li').each(function(brewery) {
+            $('#ba-content ul li').each(function(brewery) {
 
                 // One beer listing
                 var li = $(this);
